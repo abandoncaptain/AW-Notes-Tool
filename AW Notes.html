@@ -118,6 +118,8 @@
       cursor: pointer;
       padding: 0;
       transform: translateY(2px);
+      border-radius: 8px;
+      transition: transform 0.2s ease, background-color 0.2s ease;
     }
 
     .add-btn {
@@ -147,16 +149,7 @@
       width: 100%;
     }
 
-    .add-btn,
-    .del-btn,
-    .save-btn {
-      border-radius: 8px;
-      transition: transform 0.2s ease, background-color 0.2s ease;
-    }
-
-    .add-btn:hover,
-    .del-btn:hover,
-    .save-btn:hover {
+    .btn:hover {
       transform: scale(1.15);
       background-color: rgba(255, 255, 255, 0.1);
     }
@@ -400,3 +393,4 @@
 
 
 </html>
+
