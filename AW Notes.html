@@ -341,17 +341,11 @@
          const notes = document.getElementById("notes");
          const select = document.getElementById("notes-select");
          let currentKey;
-         
+
          function copyToClipboard(e, elementId) {
              const input = document.getElementById(elementId);
 
-             if (e.ctrlKey) {
-                 try {
-                     const text = await navigator.clipboard.readText();
-                     input.value = text;
-                     toast("Pasted into " + prettyName(elementId));
-                 } catch {}
-             } else if (e.shiftKey && elementId === 'phone') {
+             if (e.shiftKey && elementId === 'phone') {
                  const raw = input.value;
 
                  const formatted = raw.replace(/\D/g, '')
@@ -370,133 +364,136 @@
                  navigator.clipboard.writeText(input.value).then(() => toast("Copied " + prettyName(elementId)));
              }
          }
-         
+
          function clearAll() {
-           if (confirm(`Are you sure you want to Clear All?`)) {
-             const inputs = document.querySelectorAll("input");
-             inputs.forEach((input) => {
-               input.value = "";
-             });
-             const textareas = document.querySelectorAll("textarea");
-             textareas.forEach((textarea) => {
-               textarea.value = Storage.get(select.value);
-             });
-             sessionStorage.clear();
-           }
+             if (confirm(`Are you sure you want to Clear All?`)) {
+                 const inputs = document.querySelectorAll("input");
+                 inputs.forEach((input) => {
+                     input.value = "";
+                 });
+                 const textareas = document.querySelectorAll("textarea");
+                 textareas.forEach((textarea) => {
+                     textarea.value = Storage.get(select.value);
+                 });
+                 sessionStorage.clear();
+             }
          }
          const Storage = {
-           set(key, value) {
-             localStorage.setItem(key, value);
-             let order = JSON.parse(localStorage.getItem("__keys_order__") || "[]");
-             if (!order.includes(key)) {
-               order.push(key);
-               localStorage.setItem("__keys_order__", JSON.stringify(order));
+             set(key, value) {
+                 localStorage.setItem(key, value);
+                 let order = JSON.parse(localStorage.getItem("__keys_order__") || "[]");
+                 if (!order.includes(key)) {
+                     order.push(key);
+                     localStorage.setItem("__keys_order__", JSON.stringify(order));
+                 }
+             },
+             get(key) {
+                 return localStorage.getItem(key);
+             },
+             remove(key) {
+                 localStorage.removeItem(key);
+                 let order = JSON.parse(localStorage.getItem("__keys_order__") || "[]");
+                 order = order.filter(k => k !== key);
+                 localStorage.setItem("__keys_order__", JSON.stringify(order));
+             },
+             clear() {
+                 localStorage.clear();
+                 localStorage.removeItem("__keys_order__");
+             },
+             getKeys() {
+                 return JSON.parse(localStorage.getItem("__keys_order__") || "[]");
              }
-           },
-           get(key) {
-             return localStorage.getItem(key);
-           },
-           remove(key) {
-             localStorage.removeItem(key);
-             let order = JSON.parse(localStorage.getItem("__keys_order__") || "[]");
-             order = order.filter(k => k !== key);
-             localStorage.setItem("__keys_order__", JSON.stringify(order));
-           },
-           clear() {
-             localStorage.clear();
-             localStorage.removeItem("__keys_order__");
-           },
-           getKeys() {
-             return JSON.parse(localStorage.getItem("__keys_order__") || "[]");
-           }
          };
-         
+
          function getTemplate() {
-           const template = Storage.get("General");
-           if (!template) Storage.set("General", "CIG-\nGlass: \nVGD: \nSeries: \n");
-           return template ? template : "CIG-\nGlass: \nVGD: \nSeries: \n";
+             const template = Storage.get("General");
+             if (!template) Storage.set("General", "CIG-\nGlass: \nVGD: \nSeries: \n");
+             return template ? template : "CIG-\nGlass: \nVGD: \nSeries: \n";
          }
-         
+
          function saveTemplate() {
-           let templateData = notes.value;
-           const match = templateData.match(/\[(.*?)\]/);
-           let key;
-           if (match) {
-             key = match[1];
-             templateData = templateData.replace(match[0], "");
-             if (!Storage.get(key)) {
-               const option = document.createElement("option");
-               option.value = key;
-               option.textContent = key;
-               select.appendChild(option);
+             let templateData = notes.value;
+             const match = templateData.match(/\[(.*?)\]/);
+             let key;
+             if (match) {
+                 key = match[1];
+                 templateData = templateData.replace(match[0], "");
+                 if (!Storage.get(key)) {
+                     const option = document.createElement("option");
+                     option.value = key;
+                     option.textContent = key;
+                     select.appendChild(option);
+                 }
+                 select.value = key;
+                 notes.value = templateData;
+             } else {
+                 key = select.value;
              }
-             select.value = key;
-             notes.value = templateData;
-           } else {
-             key = select.value;
-           }
-           Storage.set(key, templateData);
-           alert("Template saved!");
+             Storage.set(key, templateData);
+             alert("Template saved!");
          }
-         
+
          function removeTemplate() {
-           const selectedKey = select.value;
-           if (selectedKey === "General") return;
-           if (confirm(`Are you sure you want to delete the template "${selectedKey}"?`)) {
-             Storage.remove(selectedKey);
-             sessionStorage.removeItem(selectedKey);
-             const option = select.querySelector(`option[value="${selectedKey}"]`);
-             if (option) option.remove();
-             select.selectedIndex = 0;
-             currentKey = select.value;
-             notes.value = sessionStorage.getItem(currentKey) || Storage.get(currentKey) || "";
-           }
+             const selectedKey = select.value;
+             if (selectedKey === "General") return;
+             if (confirm(`Are you sure you want to delete the template "${selectedKey}"?`)) {
+                 Storage.remove(selectedKey);
+                 sessionStorage.removeItem(selectedKey);
+                 const option = select.querySelector(`option[value="${selectedKey}"]`);
+                 if (option) option.remove();
+                 select.selectedIndex = 0;
+                 currentKey = select.value;
+                 notes.value = sessionStorage.getItem(currentKey) || Storage.get(currentKey) || "";
+             }
          }
-         
+
          function addTemplate() {
-           const name = prompt("Enter a name for the new template:");
-           if (!name) return;
-           if (Storage.get(name)) {
-             alert("A template with this name already exists.");
-             return;
-           }
-           Storage.set(name, "");
-           const option = document.createElement("option");
-           option.value = name;
-           option.textContent = name;
-           select.appendChild(option);
-           select.value = name;
-           currentKey = name;
-           notes.value = "";
+             const name = prompt("Enter a name for the new template:");
+             if (!name) return;
+             if (Storage.get(name)) {
+                 alert("A template with this name already exists.");
+                 return;
+             }
+             Storage.set(name, "");
+             const option = document.createElement("option");
+             option.value = name;
+             option.textContent = name;
+             select.appendChild(option);
+             select.value = name;
+             currentKey = name;
+             notes.value = "";
          }
+
          function openOverlay() {
-         document.getElementById('overlay').style.display = 'flex';
+             document.getElementById('overlay').style.display = 'flex';
          }
+
          function closeOverlay() {
-         document.getElementById('overlay').style.display = 'none';
+             document.getElementById('overlay').style.display = 'none';
          }
          document.addEventListener("DOMContentLoaded", () => {
-           notes.value = getTemplate();
-           const keys = Storage.getKeys();
-           keys.forEach(key => {
-             const option = document.createElement("option");
-             option.value = key;
-             option.textContent = key;
-             select.appendChild(option);
-           });
-           currentKey = select.value;
+             notes.value = getTemplate();
+             const keys = Storage.getKeys();
+             keys.forEach(key => {
+                 const option = document.createElement("option");
+                 option.value = key;
+                 option.textContent = key;
+                 select.appendChild(option);
+             });
+             currentKey = select.value;
          });
          select.addEventListener("change", (event) => {
-           sessionStorage.setItem(currentKey, notes.value);
-           const selectedKey = select.value;
-           const template = sessionStorage.getItem(selectedKey) || Storage.get(selectedKey) || "";
-           notes.value = template;
-           currentKey = selectedKey;
+             sessionStorage.setItem(currentKey, notes.value);
+             const selectedKey = select.value;
+             const template = sessionStorage.getItem(selectedKey) || Storage.get(selectedKey) || "";
+             notes.value = template;
+             currentKey = selectedKey;
          });
+
          function toast(msg) {
-         const t = document.createElement("div");
-         t.textContent = msg;
-         t.style.cssText = `
+             const t = document.createElement("div");
+             t.textContent = msg;
+             t.style.cssText = `
            position:fixed;
            top:20px;
            right:20px;
@@ -508,24 +505,23 @@
            opacity:0;
            transition:.2s;
          `;
-         document.body.appendChild(t);
-         requestAnimationFrame(() => t.style.opacity = 1);
-         setTimeout(() => {
-           t.style.opacity = 0;
-           setTimeout(() => t.remove(), 200);
-         }, 1200);
+             document.body.appendChild(t);
+             requestAnimationFrame(() => t.style.opacity = 1);
+             setTimeout(() => {
+                 t.style.opacity = 0;
+                 setTimeout(() => t.remove(), 200);
+             }, 1200);
          }
+
          function prettyName(id) {
-         if (id === 'fname') return 'First Name';
-         if (id === 'lname') return 'Last Name';
-         
-         return id
-           .replace(/_/g, ' ')
-           .replace(/([a-z])([A-Z])/g, '$1 $2')
-           .replace(/\b\w/g, c => c.toUpperCase());
+             if (id === 'fname') return 'First Name';
+             if (id === 'lname') return 'Last Name';
+
+             return id
+                 .replace(/_/g, ' ')
+                 .replace(/([a-z])([A-Z])/g, '$1 $2')
+                 .replace(/\b\w/g, c => c.toUpperCase());
          }
       </script>
    </body>
 </html>
-
-
