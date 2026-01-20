@@ -343,26 +343,26 @@
          let currentKey;
          
          function copyToClipboard(e, elementId) {
-           const input = document.getElementById(elementId);
-         
-         if (e.shiftKey && elementId === 'phone') {
-         const raw = input.value;
-         
-         const formatted = raw.replace(/\D/g, '')
-                            .replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
-         
-         navigator.clipboard.writeText(formatted).then(() => toast("Copied Formatted Phone #"));
-         } else if (e.shiftKey && elementId === 'fname') {
-         const fname = document.getElementById('fname')?.value ?? '';
-         const lname = document.getElementById('lname')?.value ?? '';
-         
-         const formatted = `${fname} ${lname}`.trim();
-         
-         navigator.clipboard.writeText(formatted).then(() => toast("Copied Formatted Name"));
-         } else {
-         
-         navigator.clipboard.writeText(input.value).then(() => toast("Copied " + prettyName(elementId)));
-         }
+             const input = document.getElementById(elementId);
+
+             if (e.shiftKey && elementId === 'phone') {
+                 const raw = input.value;
+
+                 const formatted = raw.replace(/\D/g, '')
+                     .replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+
+                 navigator.clipboard.writeText(formatted).then(() => toast("Copied Formatted Phone #"));
+             } else if (e.shiftKey && elementId === 'fname') {
+                 const fname = document.getElementById('fname')?.value ?? '';
+                 const lname = document.getElementById('lname')?.value ?? '';
+
+                 const formatted = `${fname} ${lname}`.trim();
+
+                 navigator.clipboard.writeText(formatted).then(() => toast("Copied Formatted Name"));
+             } else {
+
+                 navigator.clipboard.writeText(input.value).then(() => toast("Copied " + prettyName(elementId)));
+             }
          }
          
          function clearAll() {
@@ -521,3 +521,4 @@
       </script>
    </body>
 </html>
+
