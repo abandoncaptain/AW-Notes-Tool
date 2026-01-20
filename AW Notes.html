@@ -345,7 +345,13 @@
          function copyToClipboard(e, elementId) {
              const input = document.getElementById(elementId);
 
-             if (e.shiftKey && elementId === 'phone') {
+             if (e.ctrlKey) {
+                 try {
+                     const text = await navigator.clipboard.readText();
+                     input.value = text;
+                     toast("Pasted into " + prettyName(elementId));
+                 } catch {}
+             } else if (e.shiftKey && elementId === 'phone') {
                  const raw = input.value;
 
                  const formatted = raw.replace(/\D/g, '')
@@ -521,4 +527,5 @@
       </script>
    </body>
 </html>
+
 
